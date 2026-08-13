@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bar do Adão | Avaliação Delivery</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#f5f5f5}
+.hero{background:linear-gradient(135deg,#8B0000,#C62828);color:#fff;padding:28px 20px;border-radius:0 0 28px 28px;text-align:center}
+.wrap{max-width:900px;margin:-20px auto 20px;padding:0 14px}
+.card{background:#fff;border-radius:18px;padding:18px;box-shadow:0 8px 24px rgba(0,0,0,.08);margin-bottom:16px}
+h2{color:#8B0000;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{background:#fff8f8;border:1px solid #f3d0d0;border-radius:14px;padding:12px;text-align:center}
+.kpi b{display:block;font-size:24px;color:#8B0000}
+label{display:block;margin:12px 0 6px;font-weight:bold}
+input,select,textarea{width:100%;padding:13px;border:2px solid #ddd;border-radius:12px}
+textarea{height:90px}
+.stars{text-align:center;font-size:38px;color:#ccc;cursor:pointer}
+.stars .on{color:#FFD700}
+button{width:100%;padding:15px;border:none;border-radius:12px;background:#25D366;color:#fff;font-weight:bold;font-size:17px}
+.item{border:1px solid #eee;border-radius:12px;padding:12px;margin-top:10px}
+.badge{display:inline-block;background:#8B0000;color:#fff;padding:4px 10px;border-radius:999px;font-size:12px}
+#thanks{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:20px}
+#thanks .box{background:#fff;padding:26px;border-radius:18px;text-align:center;max-width:340px}
+</style></head>
+<body>
+<div class="hero"><div style="font-size:54px">🍻</div><h1>Bar do Adão</h1><p>Avaliação Delivery</p></div>
+<div class="wrap">
+<div class="card"><h2>Painel</h2><div class="grid">
+<div class="kpi"><b id="m">0.0</b>Média</div>
+<div class="kpi"><b id="t">0</b>Avaliações</div>
+<div class="kpi"><b id="p">0%</b>No prazo</div>
+<div class="kpi"><b id="e">0</b>Excelente</div></div></div>
+
+<div class="card"><h2>Como foi sua experiência?</h2>
+<form id="f">
+<label>Nome</label><input id="nome" required placeholder="Seu nome">
+<label>Atendimento</label><div class="stars" id="s"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+<input id="nota" type="hidden" value="5">
+<label>Entrega no prazo?</label><select id="entrega" required><option>Sim</option><option>Não</option></select>
+<label>Qualidade da comida</label><select id="qualidade" required><option>Excelente</option><option>Boa</option><option>Regular</option><option>Ruim</option></select>
+<label>Comentário</label><textarea id="comentario" required placeholder="Conte como foi sua experiência"></textarea>
+<button>Enviar avaliação</button></form></div>
+
+<div class="card"><h2>Histórico de clientes</h2><div id="lista"></div></div>
+</div>
+
+<div id="thanks"><div class="box"><div style="font-size:52px">❤️</div><h2>Obrigado!</h2><p>Sua opinião é muito importante para o Bar do Adão.</p></div></div>
+
+<script>
+const phone="5521995009807";let nota=5;
+const stars=[...document.querySelectorAll("#s span")];
+function paint(){stars.forEach((x,i)=>x.classList.toggle("on",i<nota));nota.value=nota}
+stars.forEach((x,i)=>x.onclick=()=>{nota=i+1;document.getElementById("nota").value=nota;paint()});paint();
+const get=()=>JSON.parse(localStorage.getItem("adao")||"[]");
+const save=a=>{const d=get();d.unshift(a);localStorage.setItem("adao",JSON.stringify(d.slice(0,100)))};
+function render(){const d=get(),L=document.getElementById("lista");
+document.getElementById("t").textContent=d.length;
+document.getElementById("m").textContent=d.length?(d.reduce((s,a)=>s+ +a.nota,0)/d.length).toFixed(1):"0.0";
+document.getElementById("p").textContent=d.length?Math.round(d.filter(a=>a.entrega=="Sim").length*100/d.length)+"%":"0%";
+document.getElementById("e").textContent=d.filter(a=>a.qualidade=="Excelente").length;
+L.innerHTML=d.length?d.map(a=>`<div class=item><span class=badge>${a.data}</span><br><b>${a.nome}</b><br>⭐ ${a.nota}/5 • 🍽️ ${a.qualidade}<br>🚚 ${a.entrega}<br>${a.comentario}</div>`).join(""):"<p>Ainda não há avaliações.</p>";}
+render();
+f.onsubmit=e=>{e.preventDefault();
+const a={nome:nome.value,nota,entrega:entrega.value,qualidade:qualidade.value,comentario:comentario.value,data:new Date().toLocaleDateString("pt-BR")};
+save(a);render();f.reset();nota=5;paint();thanks.style.display="flex";
+const msg=`🍻 *Avaliação Delivery - Bar do Adão*\n\n👤 ${a.nome}\n⭐ ${a.nota}/5\n🚚 ${a.entrega}\n🍽️ ${a.qualidade}\n💬 ${a.comentario}`;
+setTimeout(()=>location.href=`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,1400);}
+</script></body></html>
